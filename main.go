@@ -59,18 +59,10 @@ func getJsonFromLeetCode() LeetcodeProblem {
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		// handle err
+		fmt.Println("failed to Do request", err)
 	}
 	defer resp.Body.Close()
 
-	// buf := bytes.NewBuffer(body)
-	// reader, err := gzip.NewReader(buf)
-	// if err != nil {
-	// panic(err)
-	// }
-
-	// bytes.Replace(body, []byte{"\x1f"}, []byte{' '}, -1)
-	// lp := make([]LeetcodeProblem, 0)
 	lp := LeetcodeProblem{}
 
 	err = json.NewDecoder(resp.Body).Decode(&lp)
