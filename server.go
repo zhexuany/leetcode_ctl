@@ -1,9 +1,9 @@
 package main
 
 import (
+	"compress/gzip"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/cookiejar"
@@ -97,12 +97,7 @@ func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			h.WrapHandler("search", h.serveSearch).ServeHTTP(w, r)
 		}
 	case "POST":
-		switch r.URL.Path {
-		case "/login":
-			h.WrapHandler("login", h.serveLogin).ServeHTTP(w, r)
-		case "/logout":
-			h.WrapHandler("logout", h.serveLogout).ServeHTTP(w, r)
-		}
+		// h.WrapHandler("search", h.ServeSearch).ServeHTTP(w, r)
 	default:
 		http.Error(w, "", http.StatusBadRequest)
 	}
@@ -124,20 +119,43 @@ func (h *handler) serveLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	loginURL := Leetcode_base_url + "/" + Leetcode_normal_login_action
-	bodyStr := fmt.Sprintf("%s=%s&login=%s&password=%s", "csrfmiddlewaretoken", "qlkaLSFNuSFQ91s3lop8GnqA41lOYE7nU8nPAy0vytyD78yQVE22dCsRYSs6GYfs", uname, pass)
+
+	req, err := http.NewRequest("GET", loginURL, nil)
+	resp, err := h.client.Do(req)
+	cookies := h.client.Jar.Cookies(req.URL)
+
+	//form post request to login
+	var value string
+	for _, cookie := range cookies {
+		fmt.Println(cookie.Name, cookie.Value)
+		if cookie.Name == "csrftoken" {
+			value = cookie.Value
+			break
+		}
+	}
+
+	bodyStr := fmt.Sprintf("%s=%s&login=%s&password=%s", "csrftoken", value, uname, pass)
 	body := strings.NewReader(bodyStr)
-	req, err := http.NewRequest("POST", loginURL, body)
+	req, err = http.NewRequest("POST", loginURL, body)
 	if err != nil {
 		fmt.Println("failed to post request", err)
 	}
 
 	req.Header = r.Header
 	req.Header.Set("Referer", loginURL)
+	// for _, cookie := range cookies {
+	// 	if cookie.Name == "csrftoken" {
+	// 		value = cookie.Name + "=" + cookie.Value
+	// 		break
+	// 	}
+	// }
+
+	// req.Header.Set("Cookie", value)
 	if dump, err := httputil.DumpRequest(req, true); err == nil {
 		fmt.Printf("%q", dump)
 	}
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err = h.client.Do(req)
 	if err != nil {
 		h.logger.Println("failed to postfrom client", err)
 		return
@@ -146,18 +164,12 @@ func (h *handler) serveLogin(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("statuscode is %d", resp.StatusCode)
 	if resp.StatusCode == http.StatusFound {
 		_, _ = w.Write([]byte("login sucess"))
-	}
-
-	switch resp.Header.Get("Transfer-Encoding") {
-	case "chunked":
-		reader := httputil.NewChunkedReader(resp.Body)
-		if buf, err := ioutil.ReadAll(reader); err != nil {
-			fmt.Println(string(buf))
-		}
-	default:
-		if buf, err := ioutil.ReadAll(resp.Body); err != nil {
-			fmt.Println(string(buf))
-		}
+	} else {
+		buf := make([]byte, 1024*100)
+		reader, _ := gzip.NewReader(resp.Body)
+		reader.Read(buf)
+		fmt.Println(string(buf))
+		_, _ = w.Write([]byte("login failed"))
 	}
 
 	defer resp.Body.Close()
