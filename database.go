@@ -52,16 +52,11 @@ func getJsonObjectFromLeetcode() ProblemsJson {
 	if err != nil {
 		fmt.Println("failed to get reply from leetcode", err)
 	}
-	req.Header.Set("Cookie", "_gat=1; csrftoken=xKpOqsNQvNKCzhXyEwUVMhThfejftmsmUsbjvMTVOO0awGBRnrP0Ogvad2HSmXpj; _ga=GA1.2.1442407930.1481621879")
-	req.Header.Set("Dnt", "1")
 	//TODO need figure why uncomment this does work
 	// req.Header.Set("Accept-Encoding", "gzip, deflate, sdch, br")
-	req.Header.Set("Accept-Language", "zh-CN,zh;q=0.8,zh-TW;q=0.6,ja;q=0.4,en;q=0.2")
 	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.98 Safari/537.36")
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json, text/javascript, */*; q=0.01")
-	req.Header.Set("Referer", "https://leetcode.com/problemset/algorithms/")
-	req.Header.Set("X-Requested-With", "XMLHttpRequest")
 	req.Header.Set("Connection", "keep-alive")
 
 	resp, err := http.DefaultClient.Do(req)

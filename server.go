@@ -3,16 +3,18 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/cookiejar"
-	"net/url"
+	"net/http/httputil"
+	"strings"
 )
 
 const (
 	Leetcode_base_url             = "https://leetcode.com"
-	Leetcode_normal_login_action  = "/accounts/login/"
-	Leetcode_github_logtin_action = "/accounts/github/login"
+	Leetcode_normal_login_action  = "accounts/login/"
+	Leetcode_github_logtin_action = "accounts/github/login"
 	Leetcode_run_url              = "problems/%s/interpret_solution/"
 )
 
@@ -95,7 +97,12 @@ func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			h.WrapHandler("search", h.serveSearch).ServeHTTP(w, r)
 		}
 	case "POST":
-		// h.WrapHandler("search", h.ServeSearch).ServeHTTP(w, r)
+		switch r.URL.Path {
+		case "/login":
+			h.WrapHandler("login", h.serveLogin).ServeHTTP(w, r)
+		case "/logout":
+			h.WrapHandler("logout", h.serveLogout).ServeHTTP(w, r)
+		}
 	default:
 		http.Error(w, "", http.StatusBadRequest)
 	}
@@ -109,26 +116,51 @@ func (h *handler) isLogged() bool {
 func (h *handler) serveLogin(w http.ResponseWriter, r *http.Request) {
 	//extract value from request
 	uname := r.URL.Query().Get("login")
-	pass := r.URL.Query().Get("pass")
+	pass := r.URL.Query().Get("password")
 
 	if uname == "" || pass == "" {
-		http.Error(w, "user name or password is wrong", http.StatusBadRequest)
+		http.Error(w, "user name or password is not set", http.StatusBadRequest)
 		return
 	}
+
 	loginURL := Leetcode_base_url + "/" + Leetcode_normal_login_action
+	bodyStr := fmt.Sprintf("%s=%s&login=%s&password=%s", "csrfmiddlewaretoken", "qlkaLSFNuSFQ91s3lop8GnqA41lOYE7nU8nPAy0vytyD78yQVE22dCsRYSs6GYfs", uname, pass)
+	body := strings.NewReader(bodyStr)
+	req, err := http.NewRequest("POST", loginURL, body)
+	if err != nil {
+		fmt.Println("failed to post request", err)
+	}
 
-	resp, err := h.client.PostForm(loginURL, url.Values{
-		"login": {uname},
-		"pass":  {pass},
-	})
+	req.Header = r.Header
+	req.Header.Set("Referer", loginURL)
+	if dump, err := httputil.DumpRequest(req, true); err == nil {
+		fmt.Printf("%q", dump)
+	}
 
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		h.logger.Println("failed to postfrom client", err)
 		return
 	}
 
+	fmt.Printf("statuscode is %d", resp.StatusCode)
+	if resp.StatusCode == http.StatusFound {
+		_, _ = w.Write([]byte("login sucess"))
+	}
+
+	switch resp.Header.Get("Transfer-Encoding") {
+	case "chunked":
+		reader := httputil.NewChunkedReader(resp.Body)
+		if buf, err := ioutil.ReadAll(reader); err != nil {
+			fmt.Println(string(buf))
+		}
+	default:
+		if buf, err := ioutil.ReadAll(resp.Body); err != nil {
+			fmt.Println(string(buf))
+		}
+	}
+
 	defer resp.Body.Close()
-	_, _ = w.Write([]byte("login sucess"))
 }
 
 func (h *handler) serveLogout(w http.ResponseWriter, r *http.Request) {
