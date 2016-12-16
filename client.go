@@ -1,11 +1,15 @@
 package main
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
+	"golang.org/x/crypto/ssh/terminal"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"os"
+	"syscall"
 	"time"
 )
 
@@ -64,18 +68,36 @@ func setReqHeader(req *http.Request) *http.Request {
 }
 
 func (c *client) Login() error {
-	req, err := http.NewRequest("POST", c.url.String()+"/login", nil)
+	req, err := http.NewRequest("GET", c.url.String()+"/login", nil)
 	if err != nil {
-		fmt.Printf("failed to post request", err)
+		fmt.Println("failed to post request", err)
 	}
 
 	req = setReqHeader(req)
-	resp, err := c.httpClient.Do(req)
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Print("login:")
+	login, _ := reader.ReadString('\n')
+	fmt.Print("pass:")
+	passByte, err := terminal.ReadPassword(int(syscall.Stdin))
+	if err != nil {
+		fmt.Println("failed to read password", err)
+	}
+
+	params := req.URL.Query()
+	params.Set("login", login)
+	params.Set("password", string(passByte))
+	req.URL.RawQuery = params.Encode()
+
+	fmt.Print("\n")
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		fmt.Println("failed to login: \n", err)
 		return err
 	}
 	defer resp.Body.Close()
+	buf := make([]byte, 102)
+	resp.Body.Read(buf)
+	fmt.Println(string(buf))
 	return nil
 }
 
