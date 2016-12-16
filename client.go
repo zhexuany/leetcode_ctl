@@ -82,7 +82,7 @@ func readUserINFO(flag bool) (string, string) {
 	return "elder", "Yzx@umn123!"
 }
 func (c *client) Login() error {
-	req, err := http.NewRequest("GET", c.url.String()+"/login", nil)
+	req, err := http.NewRequest("POST", c.url.String()+"/login", nil)
 	if err != nil {
 		fmt.Println("failed to post request", err)
 	}
