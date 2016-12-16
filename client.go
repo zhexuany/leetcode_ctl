@@ -60,6 +60,7 @@ func (c *client) Ping(timeout time.Duration) (time.Duration, string, error) {
 func setReqHeader(req *http.Request) *http.Request {
 	// req.Header.Set("Accept-Encoding", "gzip, deflate, br")
 	req.Header.Set("Accept-Language", "en-US,en;q=0.8")
+	req.Header.Set("Cookie", "csrftoken=LAZz2QSjaVleglD68iozMc3w8UZ8UVPvfn2eRwd1ewe1esJTIy1tjr5N2L6qCfXA")
 	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.98 Safari/537.36")
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
