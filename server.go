@@ -1,18 +1,20 @@
 package main
 
 import (
+	"compress/gzip"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"net/http/cookiejar"
-	"net/url"
+	"net/http/httputil"
+	"strings"
 )
 
 const (
 	Leetcode_base_url             = "https://leetcode.com"
-	Leetcode_normal_login_action  = "/accounts/login/"
-	Leetcode_github_logtin_action = "/accounts/github/login"
+	Leetcode_normal_login_action  = "accounts/login/"
+	Leetcode_github_logtin_action = "accounts/github/login"
 	Leetcode_run_url              = "problems/%s/interpret_solution/"
 )
 
@@ -109,26 +111,68 @@ func (h *handler) isLogged() bool {
 func (h *handler) serveLogin(w http.ResponseWriter, r *http.Request) {
 	//extract value from request
 	uname := r.URL.Query().Get("login")
-	pass := r.URL.Query().Get("pass")
+	pass := r.URL.Query().Get("password")
 
 	if uname == "" || pass == "" {
-		http.Error(w, "user name or password is wrong", http.StatusBadRequest)
+		http.Error(w, "user name or password is not set", http.StatusBadRequest)
 		return
 	}
+
 	loginURL := Leetcode_base_url + "/" + Leetcode_normal_login_action
 
-	resp, err := h.client.PostForm(loginURL, url.Values{
-		"login": {uname},
-		"pass":  {pass},
-	})
+	req, err := http.NewRequest("GET", loginURL, nil)
+	resp, err := h.client.Do(req)
+	cookies := h.client.Jar.Cookies(req.URL)
 
+	//form post request to login
+	var value string
+	for _, cookie := range cookies {
+		fmt.Println(cookie.Name, cookie.Value)
+		if cookie.Name == "csrftoken" {
+			value = cookie.Value
+			break
+		}
+	}
+
+	bodyStr := fmt.Sprintf("%s=%s&login=%s&password=%s", "csrftoken", value, uname, pass)
+	body := strings.NewReader(bodyStr)
+	req, err = http.NewRequest("POST", loginURL, body)
+	if err != nil {
+		fmt.Println("failed to post request", err)
+	}
+
+	req.Header = r.Header
+	req.Header.Set("Referer", loginURL)
+	// for _, cookie := range cookies {
+	// 	if cookie.Name == "csrftoken" {
+	// 		value = cookie.Name + "=" + cookie.Value
+	// 		break
+	// 	}
+	// }
+
+	// req.Header.Set("Cookie", value)
+	if dump, err := httputil.DumpRequest(req, true); err == nil {
+		fmt.Printf("%q", dump)
+	}
+
+	resp, err = h.client.Do(req)
 	if err != nil {
 		h.logger.Println("failed to postfrom client", err)
 		return
 	}
 
+	fmt.Printf("statuscode is %d", resp.StatusCode)
+	if resp.StatusCode == http.StatusFound {
+		_, _ = w.Write([]byte("login sucess"))
+	} else {
+		buf := make([]byte, 1024*100)
+		reader, _ := gzip.NewReader(resp.Body)
+		reader.Read(buf)
+		fmt.Println(string(buf))
+		_, _ = w.Write([]byte("login failed"))
+	}
+
 	defer resp.Body.Close()
-	_, _ = w.Write([]byte("login sucess"))
 }
 
 func (h *handler) serveLogout(w http.ResponseWriter, r *http.Request) {

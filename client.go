@@ -67,6 +67,20 @@ func setReqHeader(req *http.Request) *http.Request {
 	return req
 }
 
+func readUserINFO(flag bool) (string, string) {
+	if flag {
+		reader := bufio.NewReader(os.Stdin)
+		fmt.Print("login:")
+		login, _ := reader.ReadString('\n')
+		fmt.Print("pass:")
+		passByte, err := terminal.ReadPassword(int(syscall.Stdin))
+		if err != nil {
+			fmt.Println("failed to read password", err)
+		}
+		return login, string(passByte)
+	}
+	return "elder", "Yzx@umn123!"
+}
 func (c *client) Login() error {
 	req, err := http.NewRequest("GET", c.url.String()+"/login", nil)
 	if err != nil {
@@ -74,18 +88,10 @@ func (c *client) Login() error {
 	}
 
 	req = setReqHeader(req)
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Print("login:")
-	login, _ := reader.ReadString('\n')
-	fmt.Print("pass:")
-	passByte, err := terminal.ReadPassword(int(syscall.Stdin))
-	if err != nil {
-		fmt.Println("failed to read password", err)
-	}
-
+	login, pass := readUserINFO(false)
 	params := req.URL.Query()
 	params.Set("login", login)
-	params.Set("password", string(passByte))
+	params.Set("password", pass)
 	req.URL.RawQuery = params.Encode()
 
 	fmt.Print("\n")
@@ -95,9 +101,9 @@ func (c *client) Login() error {
 		return err
 	}
 	defer resp.Body.Close()
-	buf := make([]byte, 102)
-	resp.Body.Read(buf)
-	fmt.Println(string(buf))
+	buf := make([]byte, 1024)
+	n, _ := resp.Body.Read(buf)
+	fmt.Println(string(buf[:n]))
 	return nil
 }
 
