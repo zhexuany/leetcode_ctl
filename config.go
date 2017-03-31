@@ -1,36 +1,35 @@
 package main
 
 import (
+	"errors"
+	"github.com/BurntSushi/toml"
 	"strings"
-	"time"
 )
 
-const (
-	DefaultPort = "345678"
-)
-
-type HTTPConfig struct {
-	// Addr should be of the form "http://host:port"
-	// or "http://[ipv6-host%zone]:port".
-	Addr string
-
-	// Username is the influxdb username, optional
-	Username string
-
-	// Password is the influxdb password, optional
-	Password string
-
-	// Timeout for influxdb writes, defaults to no timeout
-	Timeout time.Duration
+// Config defines your identity info and your prefered programming language
+type Config struct {
+	LeetcodeSession string `toml:"leetcode-session"`
+	CsrfToken       string `toml:"csrf-token"`
+	LangeType       string `toml:"lang-type"`
 }
 
-func NewDemoHTTPConfig() *HTTPConfig {
-	return &HTTPConfig{
-		Addr:    "http://localhost:40000",
-		Timeout: time.Duration(1000),
+// NewConfig will decode the passed file and if such file is legal toml file
+// a config will be created.
+func NewConfig(path string) (*Config, error) {
+	cfg := Config{}
+	if _, err := toml.DecodeFile(path, &cfg); err != nil {
+		return nil, err
 	}
+
+	return &cfg, cfg.Validate()
 }
 
+func (c *Config) Validate() error {
+	if c.CsrfToken == "" || c.LeetcodeSession == "" {
+		return errors.New("invalid config")
+	}
+	return nil
+}
 func ParseCommandName(args []string) (string, []string) {
 	// Retrieve command name as first argument
 	var name string

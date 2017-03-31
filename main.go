@@ -40,8 +40,6 @@ func main() {
 	}
 }
 
-var server *Server
-
 type Main struct {
 	//temporarily put client in main. TODO(zhexuany) move client to service
 	client Client
@@ -64,28 +62,34 @@ func (m *Main) Run(args ...string) error {
 	name, args := ParseCommandName(args)
 
 	switch name {
-	case "":
-		server = NewServer()
-		server.Open()
-		//launce server
-	case "run":
-		//run -> run server
-		config := NewDemoHTTPConfig()
-		client, _ := NewHTTPClient(config)
-		client.Login()
-		// m.client.Run(args)
+	case "problems":
+		ps := PostgresDB{}
+		m.Logger.Println("Open database")
+		ps.Open()
+		m.Logger.Println("write all problems into database")
+		ps.write()
 	case "submit":
-	case "login":
-	case "logout":
-	case "search":
+		cfg, err := NewConfig("./default.toml")
+		if err != nil {
+			return err
+		}
+		c, err := NewClient(cfg)
+		if err != nil {
+		}
+		if err := c.Submit(""); err != nil {
+			return err
+		}
+	case "generate":
 	case "config":
 	case "version":
 		if err := NewVersionCommand().Run(args...); err != nil {
 			return fmt.Errorf("version: %s", err)
 		}
+
+	case "":
 	case "help":
 	default:
-		return fmt.Errorf(`unknown command "%s" + "\n"`+`Run 'leetcode-ctl help' ofr usage`+"\n\n", name)
+		return fmt.Errorf(`unknown command %s"`+`Run 'leetcode-ctl help' for usage`+"\n\n", name)
 	}
 
 	return nil

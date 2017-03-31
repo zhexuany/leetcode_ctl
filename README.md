@@ -1,23 +1,17 @@
-Retrieve all problems from leetcode
-
+ Leetcode-ctl
+ ===========
+ 
+ Leetcode-ctl is a command line controller. The goal of this project is to provide a simple way
+ to grab leetcode problem and submit your solution just in terminal. 
+ 
+ #How to use this project
+ Althought grabing problem does not require you login, but submiting solution definitely require that.
+ Currently, I do not figure a way to login leetcode via your username and password. But this already pushed 
+ into todo stack. The only way to provide authentication is of using cookies. You can get these via chrome. 
+ I believe there are plenty of tutorials online.
+~~~ 
+leetcode-session= "your leetcode-session"
+csrf-token= "your csrf-token"
+lang-type= "your language"
 ~~~
-go build
-~~~
-
-./leetcode_problems > problem_list
-
-
-The online [converter](https://mholt.github.io/curl-to-go/) convert original cUrl code to Golang code. 
-The problem is `Accept-Encoding`, we actually does not need this one line code for communicating with
-server. 
-
-~~~
-req.Header.Set("Accept-Encoding", "gzip, deflate, sdch, br")
-~~~
-
-The online [Golang Json struct generator](https://mholt.github.io/json-to-go/) helps to generate Json struct
-in Golang.
-
-
-Note, the API of leetcode may changed in futrue but we alwasy can get cUrl by using Chrome developer tools.
 

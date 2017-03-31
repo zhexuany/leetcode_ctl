@@ -9,8 +9,9 @@ import (
 	"net/http"
 )
 
+//TODO put this into config file
 const (
-	DB_USER     = "postgres"
+	DB_USER     = "zhexuany"
 	DB_PASSWORD = "postgres"
 	DB_NAME     = "test"
 )
@@ -155,5 +156,4 @@ func (psql *PostgresDB) Query(key interface{}) {
 		res := fmt.Sprintf("question_id:%d question_title:%s difficulty:%d", questionID, questionTitle, questionDifficulty)
 		fmt.Println(res)
 	}
-
 }
