@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"flag"
@@ -7,7 +7,10 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"strings"
 	"time"
+
+	"github.com/zhexuany/leetcode-ctl/cmd/submit"
 )
 
 // These variables are populated via the Go linker.
@@ -41,8 +44,6 @@ func main() {
 }
 
 type Main struct {
-	//temporarily put client in main. TODO(zhexuany) move client to service
-	client Client
 	Logger *log.Logger
 	Stdin  io.Writer
 	Stdout io.Writer
@@ -63,22 +64,14 @@ func (m *Main) Run(args ...string) error {
 
 	switch name {
 	case "problems":
-		ps := PostgresDB{}
-		m.Logger.Println("Open database")
-		ps.Open()
-		m.Logger.Println("write all problems into database")
-		ps.write()
+		// ps := PostgresDB{}
+		// m.Logger.Println("Open database")
+		// ps.Open()
+		// m.Logger.Println("write all problems into database")
+		// ps.write()
 	case "submit":
-		cfg, err := NewConfig("./default.toml")
-		if err != nil {
-			return err
-		}
-		c, err := NewClient(cfg)
-		if err != nil {
-		}
-		if err := c.Submit(""); err != nil {
-			return err
-		}
+		cmd := submit.NewCommand()
+		cmd.Run(args...)
 	case "generate":
 	case "config":
 	case "version":
@@ -142,3 +135,26 @@ var versionUsage = `Displays the leetcode-ctl version, build branch and git comm
 
 Usage: leetcode-ctl version
 `
+
+func ParseCommandName(args []string) (string, []string) {
+	// Retrieve command name as first argument
+	var name string
+	if len(args) > 0 {
+		if !strings.HasPrefix(args[0], "-") {
+			name = args[0]
+		} else if args[0] == "-h" || args[0] == "-help" || args[0] == "--help" {
+			name = "help"
+		}
+	}
+
+	// If command is "help" and has an argument then rewrite args to use "-h"
+	if name == "help" && len(args) > 2 && !strings.HasPrefix(args[1], "-") {
+		return args[1], []string{"-h"}
+	}
+
+	// If a named command is specified then return it with its arguments.
+	if name != "" {
+		return name, args[1:]
+	}
+	return "", args
+}

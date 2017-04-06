@@ -1,16 +1,18 @@
-package main
+package client
 
 import (
 	"bytes"
 	"compress/gzip"
 	"encoding/json"
 	"fmt"
-	"github.com/briandowns/spinner"
 	"io"
 	"log"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/briandowns/spinner"
+	"github.com/zhexuany/leetcode-ctl/config"
 )
 
 const (
@@ -18,19 +20,19 @@ const (
 )
 
 type Client struct {
-	config     *Config
+	config     *config.Config
 	logger     *log.Logger
 	httpClient *http.Client
-	postgresDB PostgresDB
+	// postgresDB PostgresDB
 }
 
-func NewClient(conf *Config) (*Client, error) {
+func NewClient(conf *config.Config) (*Client, error) {
 	return &Client{
 		logger:     log.New(os.Stderr, "[submit] ", log.LstdFlags),
 		config:     conf,
 		httpClient: &http.Client{},
 		//TODO add db_name etc
-		postgresDB: PostgresDB{},
+		// postgresDB: PostgresDB{},
 	}, nil
 }
 
