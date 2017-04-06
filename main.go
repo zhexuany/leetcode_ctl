@@ -1,4 +1,4 @@
-package cmd
+package main
 
 import (
 	"flag"
@@ -98,7 +98,7 @@ The commands are:
     config               display the default configuration
     help                 display this help message
     generate             uses a snapshot of a data node to rebuild a cluster
-    submit               submit the solution to leetcode judge 
+    submit               submit the solution to leetcode judge
     version              displays the version
 `
 
