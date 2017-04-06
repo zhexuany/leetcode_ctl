@@ -34,13 +34,10 @@ func NewClient(conf *Config) (*Client, error) {
 	}, nil
 }
 
-func setReqHeader(req *http.Request) {
-}
-
 func (c *Client) setReqHeader(req *http.Request) {
 	cookieStr := fmt.Sprintf("LEETCODE_SESSION=%s; csrftoken=%s;", c.config.LeetcodeSession, c.config.CsrfToken)
 	req.Header.Set("Cookie", cookieStr)
-	req.Header.Set("Origin", "https://leetcode.com")
+	req.Header.Set("Origin", LEETCODE_BASE_URL)
 	req.Header.Set("X-CSRFToken", c.config.CsrfToken)
 	req.Header.Set("X-Requested-With", "XMLHttpRequest")
 	req.Header.Set("Accept-Encoding", "gzip, deflate, br")
@@ -50,7 +47,6 @@ func (c *Client) setReqHeader(req *http.Request) {
 	req.Header.Set("Accept", "application/json, text/plain, */*")
 	req.Header.Set("Connection", "keep-alive")
 	req.Header.Set("Referer", "https://leetcode.com/problems/two-sum/")
-
 }
 
 type submissionID struct {

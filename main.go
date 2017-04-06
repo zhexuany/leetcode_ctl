@@ -88,12 +88,26 @@ func (m *Main) Run(args ...string) error {
 
 	case "":
 	case "help":
+		fmt.Println(usage)
+		return nil
 	default:
 		return fmt.Errorf(`unknown command %s"`+`Run 'leetcode-ctl help' for usage`+"\n\n", name)
 	}
 
 	return nil
 }
+
+const usage = `leetcode-ctl is a command line controller. Via this awesome tool, you can submit your answer to leetcode inside a terminal.
+
+Usage: leetcode-ctl [[command]] [[arguments]]
+
+The commands are:
+    config               display the default configuration
+    help                 display this help message
+    generate             uses a snapshot of a data node to rebuild a cluster
+    submit               submit the solution to leetcode judge 
+    version              displays the version
+`
 
 // VersionCommand represents the command executed by "influxd version".
 type VersionCommand struct {
