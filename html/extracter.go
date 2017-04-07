@@ -5,7 +5,10 @@ import (
 
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/PuerkitoBio/goquery"
+	"io/ioutil"
+	"net/http"
 )
 
 type Extracter struct {
@@ -109,4 +112,67 @@ func (c Codes) getDefaultCode(language string) string {
 		}
 	}
 	return ""
+}
+
+type ProblemsJson struct {
+	FrequencyMid    int    `json:"frequency_mid"`
+	NumSolved       int    `json:"num_solved"`
+	CategorySlug    string `json:"category_slug"`
+	StatStatusPairs []struct {
+		Status interface{} `json:"status"`
+		Stat   struct {
+			TotalAcs            int         `json:"total_acs"`
+			QuestionTitle       string      `json:"question__title"`
+			QuestionArticleSlug interface{} `json:"question__article__slug"`
+			TotalSubmitted      int         `json:"total_submitted"`
+			QuestionTitleSlug   string      `json:"question__title_slug"`
+			QuestionArticleLive interface{} `json:"question__article__live"`
+			QuestionHide        bool        `json:"question__hide"`
+			QuestionID          int         `json:"question_id"`
+		} `json:"stat"`
+		IsFavor    bool `json:"is_favor"`
+		PaidOnly   bool `json:"paid_only"`
+		Difficulty struct {
+			Level int `json:"level"`
+		} `json:"difficulty"`
+		Frequency int `json:"frequency"`
+		Progress  int `json:"progress"`
+	} `json:"stat_status_pairs"`
+	IsPaid        bool   `json:"is_paid"`
+	FrequencyHigh int    `json:"frequency_high"`
+	UserName      string `json:"user_name"`
+	NumTotal      int    `json:"num_total"`
+	ListNames     struct {
+	} `json:"list_names"`
+}
+
+func GetJsonObjectFromLeetcode() error {
+	req, err := http.NewRequest("GET", "https://leetcode.com/api/problems/algorithms/", nil)
+	if err != nil {
+		fmt.Println("failed to get reply from leetcode", err)
+	}
+	// req.Header.Set("Accept-Encoding", "gzip, deflate, sdch, br")
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.98 Safari/537.36")
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json, text/javascript, */*; q=0.01")
+	req.Header.Set("Connection", "keep-alive")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		fmt.Println("failed to Do request", err)
+	}
+	defer resp.Body.Close()
+
+	bs, _ := ioutil.ReadAll(resp.Body)
+
+	ioutil.WriteFile("problems.json", bs, 0644)
+	return nil
+}
+
+func QueryByID() {
+	// lp := ProblemsJson{}
+	// err = json.NewDecoder(resp.Body).Decode(&lp)
+	// if err != nil {
+	// 	fmt.Printf("failed to decode json object %v", err)
+	// }
 }

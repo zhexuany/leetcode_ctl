@@ -28,6 +28,7 @@ func (cmd *Command) Run(args ...string) error {
 	// m.Logger.Println("write all problems into database")
 	// ps.write()
 
+	html.GetJsonObjectFromLeetcode()
 	// parse html and generate file
 	fileName := "./two-sum.go"
 	// fileName += string(opts.problemID)
