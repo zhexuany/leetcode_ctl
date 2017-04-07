@@ -8,6 +8,7 @@ import (
 
 	"github.com/zhexuany/leetcode-ctl/config"
 	"github.com/zhexuany/leetcode-ctl/html"
+	"os"
 )
 
 type Command struct {
@@ -28,7 +29,9 @@ func (cmd *Command) Run(args ...string) error {
 	}
 
 	// parse html and generate file
-	html.GetJsonObjectFromLeetcode()
+	if _, err := os.Stat("problems.json"); os.IsNotExist(err) {
+		html.GetJsonObjectFromLeetcode()
+	}
 	fileName := html.QueryByID(opts.problemID)
 	if fileName == "" {
 		panic("problem id is not existed.")
@@ -40,7 +43,7 @@ func (cmd *Command) Run(args ...string) error {
 	}
 
 	ex := html.Extracter{}
-	bs := []byte(ex.Find().Json().GetDefaultCode("golang"))
+	bs := []byte(ex.Find(fileName).Json().GetDefaultCode("golang"))
 	fmt.Println("type", cfg.LangeType)
 	ioutil.WriteFile(fileName+getFileExtenison(cfg.LangeType), bs, 0644)
 
@@ -64,6 +67,7 @@ func getFileExtenison(language string) string {
 	}
 	return ""
 }
+
 func (cmd *Command) parseFlags(args ...string) (Options, error) {
 	var opt Options
 	fs := flag.NewFlagSet("", flag.ContinueOnError)
