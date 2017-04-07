@@ -25,7 +25,7 @@ const html = `
         ng-app="app"
         ng-controller="AceCtrl as aceCtrl"
         ng-init="aceCtrl.init(
-        [{'value': 'cpp', 'text': 'C++', 'defaultCode': 'class Solution {\u000D\u000Apublic:\u000D\u000A    vector\u003Cint\u003E twoSum(vector\u003Cint\u003E\u0026 nums, int target) {\u000D\u000A        \u000D\u000A    }\u000D\u000A}\u003B' },{'value': 'java', 'text': 'Java', 'defaultCode': 'public class Solution {\u000D\u000A    public int[] twoSum(int[] nums, int target) {\u000D\u000A        \u000D\u000A    }\u000D\u000A}' },{'value': 'python', 'text': 'Python', 'defaultCode': 'class Solution(object):\u000D\u000A    def twoSum(self, nums, target):\u000D\u000A        \u0022\u0022\u0022\u000D\u000A        :type nums: List[int]\u000D\u000A        :type target: int\u000D\u000A        :rtype: List[int]\u000D\u000A        \u0022\u0022\u0022\u000D\u000A        ' },{'value': 'c', 'text': 'C', 'defaultCode': '/**\u000D\u000A * Note: The returned array must be malloced, assume caller calls free().\u000D\u000A */\u000D\u000Aint* twoSum(int* nums, int numsSize, int target) {\u000D\u000A    \u000D\u000A}' },{'value': 'csharp', 'text': 'C#', 'defaultCode': 'public class Solution {\u000D\u000A    public int[] TwoSum(int[] nums, int target) {\u000D\u000A        \u000D\u000A    }\u000D\u000A}' },{'value': 'javascript', 'text': 'JavaScript', 'defaultCode': '/**\u000D\u000A * @param {number[]} nums\u000D\u000A * @param {number} target\u000D\u000A * @return {number[]}\u000D\u000A */\u000D\u000Avar twoSum \u003D function(nums, target) {\u000D\u000A    \u000D\u000A}\u003B' },{'value': 'ruby', 'text': 'Ruby', 'defaultCode': '# @param {Integer[]} nums\u000D\u000A# @param {Integer} target\u000D\u000A# @return {Integer[]}\u000D\u000Adef two_sum(nums, target)\u000D\u000A    \u000D\u000Aend' },{'value': 'swift', 'text': 'Swift', 'defaultCode': 'class Solution {\u000D\u000A    func twoSum(_ nums: [Int], _ target: Int) \u002D\u003E [Int] {\u000D\u000A        \u000D\u000A    }\u000D\u000A}' },{'value': 'golang', 'text': 'Go', 'defaultCode': 'func twoSum(nums []int, target int) []int {\u000D\u000A    \u000D\u000A}' },],
+        [{'value': 'hpp', 'text': 'C++', 'defaultCode': 'class Solution {\u000D\u000Apublic:\u000D\u000A    vector\u003Cint\u003E twoSum(vector\u003Cint\u003E\u0026 nums, int target) {\u000D\u000A        \u000D\u000A    }\u000D\u000A}\u003B' },{'value': 'java', 'text': 'Java', 'defaultCode': 'public class Solution {\u000D\u000A    public int[] twoSum(int[] nums, int target) {\u000D\u000A        \u000D\u000A    }\u000D\u000A}' },{'value': 'python', 'text': 'Python', 'defaultCode': 'class Solution(object):\u000D\u000A    def twoSum(self, nums, target):\u000D\u000A        \u0022\u0022\u0022\u000D\u000A        :type nums: List[int]\u000D\u000A        :type target: int\u000D\u000A        :rtype: List[int]\u000D\u000A        \u0022\u0022\u0022\u000D\u000A        ' },{'value': 'c', 'text': 'C', 'defaultCode': '/**\u000D\u000A * Note: The returned array must be malloced, assume caller calls free().\u000D\u000A */\u000D\u000Aint* twoSum(int* nums, int numsSize, int target) {\u000D\u000A    \u000D\u000A}' },{'value': 'csharp', 'text': 'C#', 'defaultCode': 'public class Solution {\u000D\u000A    public int[] TwoSum(int[] nums, int target) {\u000D\u000A        \u000D\u000A    }\u000D\u000A}' },{'value': 'javascript', 'text': 'JavaScript', 'defaultCode': '/**\u000D\u000A * @param {number[]} nums\u000D\u000A * @param {number} target\u000D\u000A * @return {number[]}\u000D\u000A */\u000D\u000Avar twoSum \u003D function(nums, target) {\u000D\u000A    \u000D\u000A}\u003B' },{'value': 'ruby', 'text': 'Ruby', 'defaultCode': '# @param {Integer[]} nums\u000D\u000A# @param {Integer} target\u000D\u000A# @return {Integer[]}\u000D\u000Adef two_sum(nums, target)\u000D\u000A    \u000D\u000Aend' },{'value': 'swift', 'text': 'Swift', 'defaultCode': 'class Solution {\u000D\u000A    func twoSum(_ nums: [Int], _ target: Int) \u002D\u003E [Int] {\u000D\u000A        \u000D\u000A    }\u000D\u000A}' },{'value': 'golang', 'text': 'Go', 'defaultCode': 'func twoSum(nums []int, target int) []int {\u000D\u000A    \u000D\u000A}' },],
         '1_210021',
         1,
         '/problems/two-sum/interpret_solution/',
@@ -169,10 +169,24 @@ func GetJsonObjectFromLeetcode() error {
 	return nil
 }
 
-func QueryByID() {
-	// lp := ProblemsJson{}
-	// err = json.NewDecoder(resp.Body).Decode(&lp)
-	// if err != nil {
-	// 	fmt.Printf("failed to decode json object %v", err)
-	// }
+//QueryByID will return
+func QueryByID(id int) string {
+	bs, err := ioutil.ReadFile("problems.json")
+	if err != nil {
+		// panic for now
+		panic(err)
+	}
+
+	reader := bytes.NewReader(bs)
+	lp := ProblemsJson{}
+	err = json.NewDecoder(reader).Decode(&lp)
+	if err != nil {
+		fmt.Printf("failed to decode json object %v", err)
+	}
+	for _, val := range lp.StatStatusPairs {
+		if val.Stat.QuestionID == id {
+			return strings.ToLower(strings.Replace(val.Stat.QuestionTitle, " ", "-", -1))
+		}
+	}
+	return ""
 }
