@@ -23,6 +23,15 @@ func NewConfig(path string) (*Config, error) {
 	return &cfg, cfg.Validate()
 }
 
+func NewDemoConfig() *Config {
+	cfg := Config{}
+	cfg.LangeType = "golang"
+	cfg.LeetcodeSession = "cookie"
+	cfg.CsrfToken = "csrftoken"
+
+	return &cfg
+}
+
 func (c *Config) Validate() error {
 	if c.CsrfToken == "" || c.LeetcodeSession == "" {
 		return errors.New("invalid config")

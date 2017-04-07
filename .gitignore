@@ -7,4 +7,6 @@ leetcode-ctl
 # ignore json file
 problems.json
 
- 
+!main.go 
+
+*.go

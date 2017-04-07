@@ -12,6 +12,7 @@ import (
 
 	"github.com/zhexuany/leetcode-ctl/cmd/generate"
 	"github.com/zhexuany/leetcode-ctl/cmd/submit"
+	"github.com/zhexuany/leetcode-ctl/config"
 )
 
 // These variables are populated via the Go linker.
@@ -71,6 +72,7 @@ func (m *Main) Run(args ...string) error {
 		cmd := generate.NewCommand()
 		return cmd.Run(args...)
 	case "config":
+		config.NewPrintConfigCommand().Run(args...)
 	case "version":
 		if err := NewVersionCommand().Run(args...); err != nil {
 			return fmt.Errorf("version: %s", err)
