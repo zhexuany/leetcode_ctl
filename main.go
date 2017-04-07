@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/zhexuany/leetcode-ctl/cmd/generate"
 	"github.com/zhexuany/leetcode-ctl/cmd/submit"
 )
 
@@ -63,16 +64,12 @@ func (m *Main) Run(args ...string) error {
 	name, args := ParseCommandName(args)
 
 	switch name {
-	case "problems":
-		// ps := PostgresDB{}
-		// m.Logger.Println("Open database")
-		// ps.Open()
-		// m.Logger.Println("write all problems into database")
-		// ps.write()
 	case "submit":
 		cmd := submit.NewCommand()
-		cmd.Run(args...)
+		return cmd.Run(args...)
 	case "generate":
+		cmd := generate.NewCommand()
+		return cmd.Run(args...)
 	case "config":
 	case "version":
 		if err := NewVersionCommand().Run(args...); err != nil {
@@ -82,7 +79,6 @@ func (m *Main) Run(args ...string) error {
 	case "":
 	case "help":
 		fmt.Println(usage)
-		return nil
 	default:
 		return fmt.Errorf(`unknown command %s"`+`Run 'leetcode-ctl help' for usage`+"\n\n", name)
 	}
