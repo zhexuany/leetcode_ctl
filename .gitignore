@@ -1,2 +1,10 @@
 # ignore my personal config
 default.toml
+
+# ignore binary file
+leetcode-ctl
+
+# ignore json file
+problems.json
+
+ 
