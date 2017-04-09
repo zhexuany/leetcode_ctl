@@ -23,7 +23,6 @@ type Client struct {
 	config     *config.Config
 	logger     *log.Logger
 	httpClient *http.Client
-	// postgresDB PostgresDB
 }
 
 func NewClient(conf *config.Config) (*Client, error) {
@@ -31,8 +30,6 @@ func NewClient(conf *config.Config) (*Client, error) {
 		logger:     log.New(os.Stderr, "[submit] ", log.LstdFlags),
 		config:     conf,
 		httpClient: &http.Client{},
-		//TODO add db_name etc
-		// postgresDB: PostgresDB{},
 	}, nil
 }
 
