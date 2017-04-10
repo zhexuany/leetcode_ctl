@@ -29,6 +29,8 @@ func toJsonStr(str string) string {
 	return ret
 }
 
+// Find return A Extracter if found something: Extracter's jsonStr is not empty.
+// Otherise, jsonStr will be empty.
 func (e *Extracter) Find(name string) *Extracter {
 	reqURL := fmt.Sprintf("https://leetcode.com/problems/%s", name)
 
@@ -65,6 +67,8 @@ func (e *Extracter) Find(name string) *Extracter {
 	return ret
 }
 
+// Json return a *Extracter that already marshal jsonStr. This method can not be called
+// if jsonStr is empty.
 func (e *Extracter) Json() *Extracter {
 	if e.jsonStr == "" {
 		return nil
@@ -152,7 +156,8 @@ func GetJsonObjectFromLeetcode() error {
 	return nil
 }
 
-//QueryByID will return
+//QueryByID will return file name according to query result. If not found, simpley return
+// a empty string.
 func QueryByID(id int) string {
 	bs, err := ioutil.ReadFile("problems.json")
 	if err != nil {
