@@ -78,8 +78,7 @@ func (m *Main) Run(args ...string) error {
 			return fmt.Errorf("version: %s", err)
 		}
 
-	case "":
-	case "help":
+	case "", "help":
 		fmt.Println(usage)
 	default:
 		return fmt.Errorf(`unknown command %s"`+`Run 'leetcode-ctl help' for usage`+"\n\n", name)
@@ -88,7 +87,7 @@ func (m *Main) Run(args ...string) error {
 	return nil
 }
 
-const usage = `leetcode-ctl is a command line controller. Via this awesome tool, you can submit your answer to leetcode inside a terminal.
+const usage = `leetcode-ctl is a command line controller for submitting leetcode problem solution to its online judge.
 
 Usage: leetcode-ctl [[command]] [[arguments]]
 
