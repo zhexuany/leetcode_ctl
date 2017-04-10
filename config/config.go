@@ -36,5 +36,16 @@ func (c *Config) Validate() error {
 	if c.CsrfToken == "" || c.LeetcodeSession == "" {
 		return errors.New("invalid config")
 	}
+	if !isValidLanguageType(c.LangeType) {
+		return errors.New("invliad  language type")
+	}
 	return nil
+}
+
+func isValidLanguageType(language string) bool {
+	switch language {
+	case "golang", "java", "csharp", "cpp", "c", "javascript":
+		return true
+	}
+	return false
 }

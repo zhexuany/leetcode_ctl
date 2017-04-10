@@ -5,10 +5,10 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"os"
 
 	"github.com/zhexuany/leetcode-ctl/config"
 	"github.com/zhexuany/leetcode-ctl/html"
-	"os"
 )
 
 type Command struct {
@@ -34,7 +34,7 @@ func (cmd *Command) Run(args ...string) error {
 	}
 	fileName := html.QueryByID(opts.problemID)
 	if fileName == "" {
-		panic("problem id is not existed.")
+		panic("problem id is not existed. Please check this problem id is valid in leetcode.")
 	}
 
 	cfg, err := config.NewConfig(opts.configPath)
@@ -43,8 +43,7 @@ func (cmd *Command) Run(args ...string) error {
 	}
 
 	ex := html.Extracter{}
-	bs := []byte(ex.Find(fileName).Json().GetDefaultCode("golang"))
-	fmt.Println("type", cfg.LangeType)
+	bs := []byte(ex.Find(fileName).Json().GetDefaultCode(cfg.LangeType))
 	ioutil.WriteFile(fileName+getFileExtenison(cfg.LangeType), bs, 0644)
 
 	return nil
