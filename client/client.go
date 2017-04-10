@@ -13,6 +13,7 @@ import (
 
 	"github.com/briandowns/spinner"
 	"github.com/zhexuany/leetcode-ctl/config"
+	"io/ioutil"
 )
 
 const (
@@ -89,14 +90,18 @@ func decode(resp *http.Response) (io.ReadCloser, error) {
 	}
 	return resp.Body, nil
 }
-func parseFileContents(path string) (*bytes.Buffer, error) {
+func parseFileContents(path string, id int, cfg *config.Config) (*bytes.Buffer, error) {
 	sol := submissionContent{}
-	sol.QuestionID = 1
-	sol.Lang = "golang"
+	sol.QuestionID = id
+	sol.Lang = cfg.LangeType
 	sol.TestMode = false
 	sol.JudgeType = "large"
-	// sol.DataInput = "[3,2,4]\n6"
-	sol.TypedCode = "func twoSum(nums []int, target int) []int {\r\n   //naive approach\r\n   for i := 0; i < len(nums); i++{\r\n       for j := i + 1; j < len(nums); j++ {\r\n           if nums[i] + nums[j] == target {\r\n               return []int{i, j}\r\n           }\r\n       }\r\n   }\r\n   return nil\r\n}"
+
+	bs, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	sol.TypedCode = string(bs)
 
 	b := new(bytes.Buffer)
 	if err := json.NewEncoder(b).Encode(sol); err != nil {
@@ -107,11 +112,11 @@ func parseFileContents(path string) (*bytes.Buffer, error) {
 }
 
 // Submit will read contents in such file and submit
-func (c *Client) Submit(path string) error {
+func (c *Client) Submit(path string, id int) error {
 	s := spinner.New(spinner.CharSets[36], 100*time.Millisecond)
 	s.Prefix = "Submitting"
 	s.Start()
-	b, err := parseFileContents(path)
+	b, err := parseFileContents(path, id, c.config)
 	if err != nil {
 		return err
 	}
@@ -134,20 +139,20 @@ func (c *Client) Submit(path string) error {
 		return err
 	}
 
-	id := submissionID{}
-	if err := json.NewDecoder(resp.Body).Decode(&id); err != nil {
+	pid := submissionID{}
+	if err := json.NewDecoder(resp.Body).Decode(&pid); err != nil {
 		return err
 	}
 
-	c.logger.Println("got id", id.SubmissionID)
+	c.logger.Println("got id", pid.SubmissionID)
 	s.Stop()
-	checkURL := fmt.Sprintf("https://leetcode.com/submissions/detail/%d/check/", id.SubmissionID)
+	checkURL := fmt.Sprintf("https://leetcode.com/submissions/detail/%d/check/", pid.SubmissionID)
 
-	c.logger.Println("Waiting for 1 second, since leetcode judger need a few monents to determine your answer is correct or not.")
+	c.logger.Println("Waiting for 3 second, since leetcode judger need a few monents to determine your answer is correct or not.")
 
 	s.Prefix = "Checking"
 	s.Restart()
-	time.Sleep(1 * time.Second)
+	time.Sleep(3 * time.Second)
 	checkReq, err := http.NewRequest("GET", checkURL, nil)
 	c.setReqHeader(checkReq)
 	checkResp, err := http.DefaultClient.Do(checkReq)

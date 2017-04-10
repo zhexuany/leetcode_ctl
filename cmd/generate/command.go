@@ -44,6 +44,7 @@ func (cmd *Command) Run(args ...string) error {
 
 	ex := html.Extracter{}
 	bs := []byte(ex.Find(fileName).Json().GetDefaultCode(cfg.LangeType))
+	fmt.Printf("Generating problem: %s with problem id: %d.\n", fileName, opts.problemID)
 	ioutil.WriteFile(fileName+getFileExtenison(cfg.LangeType), bs, 0644)
 
 	return nil
