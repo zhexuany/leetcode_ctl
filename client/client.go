@@ -79,6 +79,14 @@ type checkStatus struct {
 	QuestionID     int    `json:"question_id"`
 }
 
+func (c checkStatus) ToString() string {
+	bs := new(bytes.Buffer)
+	if err := json.NewEncoder(bs).Encode(&c); err != nil {
+		panic(err)
+	}
+	return string(bs.Bytes())
+}
+
 func decode(resp *http.Response) (io.ReadCloser, error) {
 	if resp.Header.Get("Content-Encoding") == "gzip" {
 		resp.Header.Del("Content-Length")
@@ -177,13 +185,19 @@ func (c *Client) Submit(path string, id int) error {
 	}
 
 	s.Stop()
+	c.logger.Println(status.ToString())
 	if status.RunSuccess {
 		c.logger.Printf("Congras. You solve this problem with runtime %s", status.StatusRuntime)
 		c.logger.Printf("You passed %d test out of total test %d", status.TotalCorrect, status.TotalTestcases)
 		return nil
 	}
 
-	c.logger.Println("your answer is not correct and the reason is", status.DisplayRuntime)
+	// 20 complier error
+	if status.StatusCode == 20 {
+		status.State = "compile error"
+	}
+
+	c.logger.Println("your answer is not correct and the reason is", status.State)
 	c.logger.Printf("You passed %d test out of total test %d", status.TotalCorrect, status.TotalTestcases)
 	return nil
 }

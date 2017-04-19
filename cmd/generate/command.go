@@ -9,6 +9,7 @@ import (
 
 	"github.com/zhexuany/leetcode-ctl/config"
 	"github.com/zhexuany/leetcode-ctl/html"
+	"log"
 )
 
 type Command struct {
@@ -30,6 +31,7 @@ func (cmd *Command) Run(args ...string) error {
 
 	// parse html and generate file
 	if _, err := os.Stat("problems.json"); os.IsNotExist(err) {
+		log.Println("Getting problems.json from leetcode")
 		html.GetJsonObjectFromLeetcode()
 	}
 	fileName := html.QueryByID(opts.problemID)
@@ -37,6 +39,7 @@ func (cmd *Command) Run(args ...string) error {
 		panic("problem id is not existed. Please check this problem id is valid in leetcode.")
 	}
 
+	log.Println("File name is ", fileName)
 	cfg, err := config.NewConfig(opts.configPath)
 	if err != nil {
 		return err
